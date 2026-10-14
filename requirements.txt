@@ -1,0 +1,19 @@
+numpy
+pandas
+scikit-learn  #for using SVM for our face recognization system
+dlib-bin
+
+git+https://github.com/ageitgey/face_recognition_models  #for face embedend
+setuptools
+
+
+supabase  #give us free data base
+bcrypt #it give us the Hashing methods
+
+
+segno # it gives us the qr code, if we give the url then it convert it into qr code
+pillow #it uses for image processing and it also give us the methods to resize the image or flip it or transform etc.
+
+
+streamlit #it is a frontend library
+
