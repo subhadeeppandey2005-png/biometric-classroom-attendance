@@ -1,4 +1,8 @@
+.vscode
+.env
 venv/
 **/venv/
 *.pyc
 __pycache__/
+.streamlit/
+dist/

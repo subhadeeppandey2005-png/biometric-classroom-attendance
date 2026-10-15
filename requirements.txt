@@ -17,3 +17,4 @@ pillow #it uses for image processing and it also give us the methods to resize t
 
 streamlit #it is a frontend library
 
+ 
