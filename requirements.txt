@@ -17,4 +17,5 @@ pillow #it uses for image processing and it also give us the methods to resize t
 
 streamlit #it is a frontend library
 
- 
+ librosa ## it helps to edit the voce all the staff needed 
+ resemblyzer ## make embedding of that voice
