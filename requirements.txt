@@ -1,3 +1,4 @@
+streamlit #it is a frontend library
 numpy
 pandas
 scikit-learn  #for using SVM for our face recognization system
@@ -15,7 +16,7 @@ segno # it gives us the qr code, if we give the url then it convert it into qr c
 pillow #it uses for image processing and it also give us the methods to resize the image or flip it or transform etc.
 
 
-streamlit #it is a frontend library
+
 
  librosa ## it helps to edit the voce all the staff needed 
  resemblyzer ## make embedding of that voice

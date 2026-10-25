@@ -7,6 +7,10 @@ from src.Components.dialog_auto_enroll import auto_enroll_dialog
 
 
 def main():
+    st.set_page_config(
+        page_title = 'SnapClass - Making Atendance faster using AI',
+        page_icon="https://i.ibb.co/YTYGn5qV/logo.png"
+    )
     # 1. Check for query parameter (handling both hyphen and underscore formats)
     join_code = st.query_params.get('join-code') or st.query_params.get('join_code')
 
