@@ -3,7 +3,11 @@ import streamlit as st
 from src.UI.base_layout import style_background_dashboard, style_base_layout
 from src.Components.header import header_dashboard
 from src.Components.footer import footer_dashboard
-from src.database.db import check_teacher_exists, create_teacher, teacher_login
+from src.Components.subject_card import subject_card
+from src.database.db import check_teacher_exists, create_teacher, teacher_login, get_teacher_subjects
+from src.Components.dialog_create_subject import create_subject_dialog
+from src.Components.dialog_share_subject import share_subject_dialog
+
 
 
 def teacher_screen():
@@ -15,7 +19,6 @@ def teacher_screen():
 
     if "teacher_data" in st.session_state:
         teacher_dashboard()
-
     elif st.session_state.teacher_login_type == "login":
         teacher_screen_login()
     elif st.session_state.teacher_login_type == "register":
@@ -28,11 +31,12 @@ def teacher_dashboard():
     with c1:
         header_dashboard()
     with c2:
-        st.subheader(f"""Welcome, {teacher_data['name']} """)
+        st.subheader(f"Welcome, {teacher_data.get('name', '')}")
         st.markdown('<div style="display: flex; justify-content: flex-end;">', unsafe_allow_html=True)
         if st.button("Logout", type='secondary', key='logout_btn', shortcut="control+backspace"):
             st.session_state['is_logged_in'] = False
-            del st.session_state.teacher_data
+            if 'teacher_data' in st.session_state:
+                del st.session_state.teacher_data
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -40,11 +44,10 @@ def teacher_dashboard():
 
     if "current_teacher_tab" not in st.session_state:
         st.session_state.current_teacher_tab = 'take_attendance'
-        
+
     tab1, tab2, tab3 = st.columns(3)
 
     with tab1:
-
         type1 = "primary" if st.session_state.current_teacher_tab == 'take_attendance' else "tertiary"
         if st.button('Take Attendance', type=type1, use_container_width=True, icon=':material/ar_on_you:'):
             st.session_state.current_teacher_tab = 'take_attendance'
@@ -62,27 +65,71 @@ def teacher_dashboard():
             st.session_state.current_teacher_tab = 'attendance_records'
             st.rerun()
 
-
     st.divider()
 
     if st.session_state.current_teacher_tab == "take_attendance":
         teacher_tab_take_attendance()
 
-
     if st.session_state.current_teacher_tab == "manage_subjects":
         teacher_tab_manage_subjects()
-
 
     if st.session_state.current_teacher_tab == "attendance_records":
         teacher_tab_attendance_records()
 
     footer_dashboard()
 
+
 def teacher_tab_take_attendance():
     st.header('Take AI Attendance')
 
+
 def teacher_tab_manage_subjects():
-    st.header('Manage Subjects')
+    # Safely retrieve teacher identifier (checks both 'teacher_id' and 'id')
+    teacher_id = st.session_state.teacher_data.get('teacher_id') or st.session_state.teacher_data.get('id')
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.header('Manage Subjects')
+
+    with col2:
+        if st.button('Create New Subject', use_container_width=True):
+            create_subject_dialog(teacher_id)
+
+    # Fetch subjects for this teacher
+    subjects = get_teacher_subjects(teacher_id)
+    if subjects:
+        for sub in subjects:
+            total_students = sub.get('total_students', 0)
+            total_classes = sub.get('total_classes', 0)
+
+            stats = [
+                ("👥", "Students", total_students),
+                ("🕰️", "Classes", total_classes),
+            ]
+
+            # Factory function to avoid late-binding closure bugs
+            def make_share_btn(current_sub):
+                def share_btn():
+                    # Adds controlled spacing above the share button
+                    st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+                    if st.button(
+                        f"Share Code: {current_sub['name']}",
+                        key=f"share_{current_sub['subject_code']}",
+                        icon=":material/share:"
+                    ):
+                        share_subject_dialog(current_sub['name'], current_sub['subject_code'])
+                return share_btn
+
+            subject_card(
+                name=sub['name'],
+                code=sub['subject_code'],
+                section=sub.get('section', ''),
+                stats=stats,
+                footer_callback=make_share_btn(sub)
+            )
+    else:
+        st.info("NO SUBJECTS FOUND. CREATE ONE ABOVE")
+
 
 def teacher_tab_attendance_records():
     st.header('Attendance Records')
@@ -125,7 +172,6 @@ def teacher_screen_login():
 
     btnc1, btnc2 = st.columns(2)
     with btnc1:
-        # Left Button: Pink Action Button
         if st.button('Login', type='secondary', icon=':material/passkey:', shortcut='control+enter', use_container_width=True, key='login_submit_btn'):
             if teacher_username and teacher_password:
                 if login_teacher(teacher_username, teacher_password):
@@ -139,7 +185,6 @@ def teacher_screen_login():
                 st.warning("Please enter your username and password.")
 
     with btnc2:
-        # Right Button: Blue Switch Button
         if st.button('Register', type="primary", icon=':material/person_add:', shortcut='shift+enter', use_container_width=True, key='goto_reg_btn'):
             st.session_state.teacher_login_type = 'register'
             st.rerun()
@@ -185,7 +230,6 @@ def teacher_screen_register():
     st.divider()
 
     btnc1, btnc2 = st.columns(2)
-    
     # Left Column: Login Instead Switch Button
     with btnc1:
         if st.button('Login Instead', type='secondary', icon=':material/passkey:', shortcut='shift+enter', use_container_width=True, key='goto_login_btn'):
