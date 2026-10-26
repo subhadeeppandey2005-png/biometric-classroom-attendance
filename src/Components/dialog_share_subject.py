@@ -6,7 +6,7 @@ import streamlit as st
 @st.dialog("Share Class Link")
 def share_subject_dialog(subject_name, subject_code):
     # Strip any trailing slashes to guarantee exactly one slash before the query string
-    app_domain = "http://localhost:8501".rstrip("/")
+    app_domain = "snapclass-main.streamlit.app".rstrip("/")
     join_url = f"{app_domain}/?join-code={subject_code}"
 
     st.header(f"Join {subject_name}")
