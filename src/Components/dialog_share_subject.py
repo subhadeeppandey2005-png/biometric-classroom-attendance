@@ -5,10 +5,11 @@ import streamlit as st
 
 @st.dialog("Share Class Link")
 def share_subject_dialog(subject_name, subject_code):
-    # Strip any trailing slashes to guarantee exactly one slash before the query string
-    app_domain = "https://snapclass-ai.streamlit.app"
-    join_url = f"{app_domain.rstrip('/')}/?join-code={subject_code}"
-
+    # Automatically grabs the active Streamlit domain or defaults to localhost
+    host = st.context.headers.get("host", "localhost:8501")
+    protocol = "https" if "streamlit.app" in host else "http"
+    join_url = f"{protocol}://{host}/?join-code={subject_code}"
+    
     st.header(f"Join {subject_name}")
 
     qr = segno.make(join_url)
